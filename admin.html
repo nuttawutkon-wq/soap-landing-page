@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการออเดอร์ & แพ็คสินค้า</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ซ่อนส่วนที่ไม่ต้องการเมื่อสั่งพิมพ์ (Print) ใบจ่าหน้าพัสดุ */
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <nav class="bg-gray-900 text-white p-4">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <h1 class="text-lg font-bold">📦 ระบบคลังสินค้า & แพ็คจัดส่ง</h1>
+      <a href="index.html" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded">กลับหน้าร้านค้า</a>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto p-4 md:p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold">รายการคำสั่งซื้อทั้งหมด</h2>
+      <button onclick="fetchOrders()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">🔄 รีเฟรชข้อมูล</button>
+    </div>
+
+    <div id="loading" class="text-center py-10 text-gray-500">กำลังโหลดข้อมูลจาก Google Sheets...</div>
+    <div id="orderList" class="grid gap-4"></div>
+  </main>
+
+  <!-- Modal สำหรับพิมพ์ใบจ่าหน้าพัสดุ & ใบหยิบสินค้า -->
+  <div id="labelModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl">
+      
+      <!-- พื้นที่สำหรับ Print -->
+      <div id="printArea" class="border-2 border-black p-5 rounded-lg bg-white">
+        <div class="flex justify-between border-b-2 border-black pb-3 mb-3">
+          <div>
+            <p class="font-bold text-lg">ผู้ส่ง (SENDER):</p>
+            <p class="text-sm">ร้าน AromaPure Soap</p>
+            <p class="text-sm">123 ถ.สุขุมวิท กรุงเทพฯ 10110 (โทร. 02-000-0000)</p>
+          </div>
+          <div class="text-right">
+            <span id="lblOrderId" class="font-mono font-bold text-sm border border-black px-2 py-1"></span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <p class="font-bold text-lg">ผู้รับ (RECEIVER):</p>
+          <p id="lblName" class="text-xl font-bold mt-1"></p>
+          <p id="lblPhone" class="text-base font-semibold"></p>
+          <p id="lblAddress" class="text-base mt-1 leading-relaxed"></p>
+        </div>
+
+        <div class="border-t-2 border-dashed border-gray-400 pt-3">
+          <p class="font-bold text-sm mb-1">📋 รายการหยิบสินค้า (Packing List):</p>
+          <ul id="lblItems" class="text-sm space-y-1"></ul>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-3">
+        <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">ปิด</button>
+        <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700">🖨️ พิมพ์ใบจ่าหน้าพัสดุ</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // <-- ใส่ URL เดียวกันกับหน้า index.html
+    let ordersData = [];
+
+    async function fetchOrders() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('orderList').innerHTML = '';
+      
+      try {
+        const res = await fetch(https://script.google.com/macros/s/AKfycbw0ovTOVHbjeK0hFRJhZNsnfPtCiUbvWNJHC2YyCI1BB5Xqd3bdFmXsS33tiFQs6BeH/exec);
+        ordersData = await res.json();
+        renderOrders(ordersData);
+      } catch (err) {
+        alert("โหลดข้อมูลไม่สำเร็จ");
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById('orderList');
+      if (orders.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500">ยังไม่มีคำสั่งซื้อ</p>';
+        return;
+      }
+
+      orders.forEach((ord, index) => {
+        const isPacked = ord.Status === "แพ็คและจัดส่งแล้ว";
+        const badgeColor = isPacked ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800";
+
+        const card = `
+          <div class="bg-white p-5 rounded-xl shadow border flex flex-col md:flex-row justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-3 mb-2">
+                <span class="font-mono font-bold text-lg text-emerald-800">${ord.OrderID}</span>
+                <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${badgeColor}">${ord.Status}</span>
+                <span class="text-xs text-gray-400">${ord.Timestamp}</span>
+              </div>
+              <p class="font-bold text-gray-900">${ord.CustomerName} <span class="font-normal text-gray-600">(${ord.Phone})</span></p>
+              <p class="text-sm text-gray-600 mb-3">${ord.Address}</p>
+              
+              <!-- ส่วนช่วยหยิบสินค้า (Picking) -->
+              <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg inline-block">
+                <p class="text-xs font-bold text-amber-900 mb-1">รายการที่ต้องหยิบ:</p>
+                <div class="text-sm space-x-4">
+                  ${ord.SKU1_Qty > 0 ? `<span class="font-semibold">✅ SKU-01 น้ำผึ้งขมิ้น: <b>${ord.SKU1_Qty}</b> ก้อน</span>` : ''}
+                  ${ord.SKU2_Qty > 0 ? `<span class="font-semibold">✅ SKU-02 ชาเขียวมิ้นท์: <b>${ord.SKU2_Qty}</b> ก้อน</span>` : ''}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col justify-between items-end">
+              <span class="text-xl font-bold text-gray-800">ยอดรวม ฿${ord.TotalPrice}</span>
+              <div class="flex space-x-2 mt-4">
+                <button onclick="openShippingLabel(${index})" class="bg-gray-800 hover:bg-gray-900 text-white text-sm px-3 py-2 rounded-lg">
+                  🏷️ ใบจ่าหน้าพัสดุ
+                </button>
+                ${!isPacked ? `
+                  <button onclick="markAsPacked('${ord.OrderID}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg">
+                    ✔️ ยืนยันแพ็คเสร็จ
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += card;
+      });
+    }
+
+    function openShippingLabel(index) {
+      const ord = ordersData[index];
+      document.getElementById('lblOrderId').innerText = ord.OrderID;
+      document.getElementById('lblName').innerText = ord.CustomerName;
+      document.getElementById('lblPhone').innerText = "โทร: " + ord.Phone;
+      document.getElementById('lblAddress').innerText = ord.Address;
+      
+      let itemsHtml = '';
+      if (ord.SKU1_Qty > 0) itemsHtml += `<li>[ ] SKU-01 สบู่สูตรน้ำผึ้งขมิ้นชัน จำนวน ${ord.SKU1_Qty} ก้อน</li>`;
+      if (ord.SKU2_Qty > 0) itemsHtml += `<li>[ ] SKU-02 สบู่สูตรชาเขียวมิ้นท์ จำนวน ${ord.SKU2_Qty} ก้อน</li>`;
+      document.getElementById('lblItems').innerHTML = itemsHtml;
+
+      document.getElementById('labelModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('labelModal').classList.add('hidden');
+    }
+
+    async function markAsPacked(orderId) {
+      if (!confirm(`ยืนยันว่าแพ็คสินค้าออเดอร์ ${orderId} เรียบร้อยแล้ว?`)) return;
+      
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: "updateStatus", orderId: orderId, status: "แพ็คและจัดส่งแล้ว" })
+        });
+        fetchOrders();
+      } catch (err) {
+        alert("อัปเดตสถานะไม่สำเร็จ");
+      }
+    }
+
+    // โหลดข้อมูลทันทีเมื่อเปิดหน้าเว็บ
+    fetchOrders();
+  </script>
+</body>
+</html>
