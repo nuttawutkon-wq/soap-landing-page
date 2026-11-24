@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AromaPure - สบู่สมุนไพรธรรมชาติ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-emerald-800 text-white p-4 shadow-md sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-wide">🌿 AromaPure Soap</h1>
+      <a href="admin.html" class="text-xs bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded">ระบบหลังบ้าน (แพ็คสินค้า)</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="text-center py-12 px-4 bg-gradient-to-b from-emerald-100 to-amber-50">
+    <h2 class="text-3xl md:text-4xl font-extrabold text-emerald-900 mb-3">ผิวนุ่มชุ่มชื้น ด้วยสารสกัดธรรมชาติ 100%</h2>
+    <p class="text-gray-600 max-w-xl mx-auto">สบู่แฮนด์เมดสูตรอ่อนโยน ปราศจากสารเคมีอันตราย คัดสรรวัตถุดิบออร์แกนิกเพื่อผิวสุขภาพดี</p>
+  </header>
+
+  <!-- Products (2 SKUs) -->
+  <main class="max-w-4xl mx-auto px-4 pb-16">
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+      
+      <!-- SKU 1 -->
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-emerald-100">
+        <!-- ดึงรูปจากโฟลเดอร์ images ใน GitHub -->
+        <img src="./images/soap-sku1.jpg" alt="สบู่สูตรน้ำผึ้งขมิ้นชัน" class="w-full h-64 object-cover bg-gray-200">
+        <div class="p-6">
+          <span class="text-xs font-semibold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded">SKU-01</span>
+          <h3 class="text-xl font-bold mt-2">สบู่สูตรน้ำผึ้งขมิ้นชัน (Honey Turmeric)</h3>
+          <p class="text-sm text-gray-600 mt-1">ช่วยลดสิว ฝ้า จุดด่างดำ ให้ผิวกระจ่างใสอย่างเป็นธรรมชาติ</p>
+          <div class="mt-4 flex justify-between items-center">
+            <span class="text-2xl font-bold text-emerald-700">฿120</span>
+            <div class="flex items-center space-x-2">
+              <label class="text-sm">จำนวน:</label>
+              <input type="number" id="sku1Qty" min="0" value="1" onchange="calculateTotal()" class="w-16 border rounded-lg p-1.5 text-center">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKU 2 -->
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-emerald-100">
+        <!-- ดึงรูปจากโฟลเดอร์ images ใน GitHub -->
+        <img src="./images/soap-sku2.jpg" alt="สบู่สูตรชาเขียวมิ้นท์" class="w-full h-64 object-cover bg-gray-200">
+        <div class="p-6">
+          <span class="text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded">SKU-02</span>
+          <h3 class="text-xl font-bold mt-2">สบู่สูตรชาเขียวมิ้นท์ (Green Tea Mint)</h3>
+          <p class="text-sm text-gray-600 mt-1">ดีท็อกซ์ผิว ลดความมันส่วนเกิน ให้ความรู้สึกเย็นสดชื่น</p>
+          <div class="mt-4 flex justify-between items-center">
+            <span class="text-2xl font-bold text-emerald-700">฿150</span>
+            <div class="flex items-center space-x-2">
+              <label class="text-sm">จำนวน:</label>
+              <input type="number" id="sku2Qty" min="0" value="0" onchange="calculateTotal()" class="w-16 border rounded-lg p-1.5 text-center">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Order Form -->
+    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg max-w-xl mx-auto border border-emerald-200">
+      <h3 class="text-2xl font-bold text-emerald-900 mb-4 border-b pb-2">ข้อมูลจัดส่งสินค้า</h3>
+      
+      <div class="bg-emerald-50 p-4 rounded-xl mb-6 flex justify-between items-center">
+        <span class="font-medium">ยอดชำระเงินทั้งหมด:</span>
+        <span id="totalDisplay" class="text-2xl font-extrabold text-emerald-800">฿120</span>
+      </div>
+
+      <form id="orderForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">ชื่อ-นามสกุล ผู้รับ *</label>
+          <input type="text" id="customerName" required placeholder="เช่น นายสมชาย ใจดี" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">เบอร์โทรศัพท์ *</label>
+          <input type="tel" id="phone" required placeholder="เช่น 0812345678" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">ที่อยู่จัดส่ง (พร้อมรหัสไปรษณีย์) *</label>
+          <textarea id="address" rows="3" required placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow transition">
+          ยืนยันการสั่งซื้อ
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0ovTOVHbjeK0hFRJhZNsnfPtCiUbvWNJHC2YyCI1BB5Xqd3bdFmXsS33tiFQs6BeH/exec"; // <-- ใส่ URL ที่ได้จาก Google Apps Script
+
+    function calculateTotal() {
+      const q1 = parseInt(document.getElementById('sku1Qty').value) || 0;
+      const q2 = parseInt(document.getElementById('sku2Qty').value) || 0;
+      const total = (q1 * 120) + (q2 * 150);
+      document.getElementById('totalDisplay').innerText = `฿${total.toLocaleString()}`;
+      return total;
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const q1 = parseInt(document.getElementById('sku1Qty').value) || 0;
+      const q2 = parseInt(document.getElementById('sku2Qty').value) || 0;
+      const total = calculateTotal();
+
+      if (q1 === 0 && q2 === 0) {
+        alert("กรุณาเลือกสินค้าอย่างน้อย 1 ชิ้น");
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = "กำลังบันทึกคำสั่งซื้อ...";
+
+      const payload = {
+        customerName: document.getElementById('customerName').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        sku1Qty: q1,
+        sku2Qty: q2,
+        totalPrice: total
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        alert(`สั่งซื้อสำเร็จ! รหัสคำสั่งซื้อของคุณคือ: ${result.orderId}`);
+        document.getElementById('orderForm').reset();
+        document.getElementById('sku1Qty').value = 1;
+        document.getElementById('sku2Qty').value = 0;
+        calculateTotal();
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "ยืนยันการสั่งซื้อ";
+      }
+    });
+  </script>
+</body>
+</html>
